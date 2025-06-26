@@ -14,24 +14,54 @@
 //  });
 
 //get call to get data
-app.get("/user", (req,res) =>{
-   res.send({firstNAme: "Anushka", lastName: "Rathore"});
-});
+// app.get("/user", (req,res) =>{
+//    res.send({firstNAme: "Anushka", lastName: "Rathore"});
+// });
 
 //post call
-app.post("/user",(req,res) => {
-   res.send("data saved successfully to database");
-});
+// app.post("/user",(req,res) => {
+//    res.send("data saved successfully to database");
+// });
 
 //delete call
-app.delete("/user",(req,res) => {
-   res.send("data deleted successfully");
-});
- // ["/rest" is request handler for rest, now server will response to (localhost:3000/rest)]
- app.use("/rest",(req,res) => {
-    res.send("Hello from the server! ");
- });
+// app.delete("/user",(req,res) => {
+//    res.send("data deleted successfully");
+// });
 
+ // ["/rest" is request handler for rest, now server will response to (localhost:3000/rest)]
+//  app.use("/rest",(req,res) => {
+//     res.send("Hello from the server! ");
+//  });
+
+
+//chaining
+
+
+  app.use("/user",
+   (req,res,next) => {
+   console.log("handling errors!!");
+   // res.send("Hello from the server!");
+   next();
+ },
+(req,res,next)=>{
+   console.log("handling errors2!!");
+   //res.send("Hello from the server2 !");
+   next();
+},
+(req,res,next)=>{
+   console.log("handling errors3!!");
+   //res.send("Hello from the server3 !");
+   next();
+},
+(req,res,next)=>{
+   console.log("handling errors4!!");
+   //res.send("Hello from the server4 !");
+   next();
+},
+(req,res)=>{
+   console.log("handling errors5!!");
+   res.send("Hello from the server5 !");
+});
 
 
 //  app.use("/hello",(req,res) => {
