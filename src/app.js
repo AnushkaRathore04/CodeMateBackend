@@ -1,47 +1,86 @@
-//this is the starting point od application here we will write all our nodejs code
+//creation server
+const express = require('express');
+const {connectDb} = require("./config/database");
+//creating instance of new application of express
+const app = express();
+const User = require("./models/user");
 
- //creation server
- const express = require('express');
+//sending data dynamically. adding express.json middleware
+app.use(express.json());
 
- //creating instance of new application of express
- const app = express();
-
-
-// const { adminAuth } = require('./middlewares/auth');
-
-//  //middleware
-// app.use("/admin",adminAuth);
-
-
-//  app.get("/admin/getAllData",(req,res) => {
-//    //logic for checking if request is authorized
-//    res.send("data sent");
-//  });
-
-//  app.get("/admin/deleteUser",(req,res) => {
-//    res.send("deleted data");
-//  });
-
-//error handling
-
-
-app.use("/",(err,req,res,next) => {
-   if(err){
-      res.status(500).send("something went wrong");
-   }
-})
-
-app.get("/getUserData",(req,res) => {
+//creating first api which will insert data into our database
+app.post("/signUp",async(req,res)=>{
+   //creating a new instance of a user model
+   const user = new User(req.body);
    try{
-      throw new Error("xys");
-      res.send("data sent");
+      await user.save();//this will return a promise
+      res.send("user added successfully");
    }catch(err){
-       res.status(500).send("something went wrong");
+      res.status(400).send("error saving the user:" +err.message);
    }
 });
 
- //to creating a new server we have to listen to the incoming request
- app.listen(3000, () =>{
-    console.log("server is running successfully on port 3000...");
- }); // app is listening on port 3000
+//getting data from database
 
+//find user with email
+app.get("/user", async (req,res) => {
+   const useremail = req.body.emailID;
+   // const userid = req.body._id;
+
+   try{
+      // const users = await User.findById(userid);
+      // res.send(users);
+      const users = await User.find({emailID : useremail});
+      if(users.length === 0){
+         res.status(401).send("not found");
+      }else{
+         res.send(users);
+      }
+   }catch(err){
+      res.status(404).send("something went wrong");
+   }
+});
+//to get all data
+app.get("/feed", async (req,res) => {
+   try{
+      const users = await User.find({});
+      res.send(users);
+   }catch(err){
+      res.status(404).send("something went wrong");
+   }
+});
+
+//delete user data
+app.delete("/remove", async (req,res) => {
+   const userID = req.body._id;
+   try{
+      const users = await User.findByIdAndDelete(userID);
+      res.send("user deleted successfully");
+   }catch(err){
+      res.status(404).send("something went wrong");
+   }
+});
+
+//update data
+app.patch("/update", async (req,res) => {
+   const id = req.body._id;
+   const value = req.body;
+   try{
+      const user = await User.findByIdAndUpdate(id,value);
+      res.send("user updated");
+   }catch(err){
+      res.status(401).send("something went wrong");
+   }
+});
+
+connectDb()
+   .then(() =>{
+      console.log("database connection established..");
+      //to creating a new server we have to listen to the incoming request
+      app.listen(7777, () =>{
+      console.log("server is running successfully on port 7777...");
+      });
+   })
+   .catch((err) =>{
+      console.log("database cannot be connected");
+   });
