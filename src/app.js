@@ -13,6 +13,9 @@ app.post("/signUp",async(req,res)=>{
    //creating a new instance of a user model
    const user = new User(req.body);
    try{
+      if(user?.skills.length > 10){
+         throw new Error("update not allowed skills are greater than 10 ")
+      }
       await user.save();//this will return a promise
       res.send("user added successfully");
    }catch(err){
@@ -62,14 +65,26 @@ app.delete("/remove", async (req,res) => {
 });
 
 //update data
-app.patch("/update", async (req,res) => {
-   const id = req.body._id;
+app.patch("/update/:userId", async (req,res) => {
+   const userId = req.params?.userId;
    const value = req.body;
    try{
-      const user = await User.findByIdAndUpdate(id,value);
+      const Allowed_updates=["photoUrl","about","age","gender","skills"];
+      const isUpdateAllowed= Object.keys(value).every((k) =>
+         Allowed_updates.includes(k)
+      );
+      if(!isUpdateAllowed){
+         throw new Error("update not allowed ");
+      }
+      if(value?.skills.length > 10){
+         throw new Error("update not allowed skills are greater than 10 ")
+      }
+      const user = await User.findByIdAndUpdate(userId,value,{
+         runValidators: true,
+      });
       res.send("user updated");
    }catch(err){
-      res.status(401).send("something went wrong");
+      res.status(401).send("something went wrong "+ err.message);
    }
 });
 
