@@ -11,7 +11,7 @@
     "nodejs",
     "javascript"
   ],
-  "author": "Anushka RAthore",
+  "author": "Anushka Rathore",
   "license": "ISC",
   "dependencies": {
     "express": "^5.1.0",
