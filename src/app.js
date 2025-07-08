@@ -1,29 +1,18 @@
-//creation server
-const express = require('express');
+const express = require('express');//creation server
 const {connectDb} = require("./config/database");
-//creating instance of new application of express
-const app = express();
-const User = require("./models/user");
+const app = express();//creating instance of new application of express
+const cookieParser = require("cookie-parser"); //to read cookie
 
-//sending data dynamically. adding express.json middleware
-app.use(express.json());
+app.use(express.json());//sending data dynamically. adding express.json middleware
+app.use(cookieParser());//adding cookieParser middleware
 
-//creating first api which will insert data into our database
-app.post("/signUp",async(req,res)=>{
-   //creating a new instance of a user model
-   const user = new User(req.body);
-   try{
-      if(user?.skills.length > 10){
-         throw new Error("update not allowed skills are greater than 10 ")
-      }
-      await user.save();//this will return a promise
-      res.send("user added successfully");
-   }catch(err){
-      res.status(400).send("error saving the user:" +err.message);
-   }
-});
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
+const requestRouter = require("./routes/request");
 
-//getting data from database
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestRouter);
 
 //find user with email
 app.get("/user", async (req,res) => {

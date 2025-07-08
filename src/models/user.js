@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const bcrypt= require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 //schema -> model -> document
 const userSchema = new mongoose.Schema({
@@ -28,7 +30,7 @@ const userSchema = new mongoose.Schema({
     },
     password:{
         type: String,
-        required: true,
+        required: true, 
         validate(value) {
             if(!validator.isStrongPassword(value)){
                 throw new Error("enter a strong password "+ value);
@@ -62,5 +64,20 @@ const userSchema = new mongoose.Schema({
     timestamps:true,
 }
 );
-//model 
+//schema methods= using this methods makes our function reusable 
+
+userSchema.methods.getJWT = async function () {
+    const user= this;//this "this" keyword will work with normal function not with arrow function
+    const token =  await jwt.sign({_id : user._id}, "Dev@tinder321",{expiresIn:"7d"});
+    return token;
+};
+
+userSchema.methods.validatePassword = async function (passwordInputByUser) {
+    const user = this;
+    const passwordHash = user.password;
+
+    const isPasswordValid= await bcrypt.compare(passwordInputByUser,passwordHash);
+    return isPasswordValid;
+};
+
 module.exports = mongoose.model("User",userSchema);
