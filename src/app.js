@@ -53,30 +53,6 @@ app.delete("/remove", async (req,res) => {
    }
 });
 
-//update data
-app.patch("/update/:userId", async (req,res) => {
-   const userId = req.params?.userId;
-   const value = req.body;
-   try{
-      const Allowed_updates=["photoUrl","about","age","gender","skills"];
-      const isUpdateAllowed= Object.keys(value).every((k) =>
-         Allowed_updates.includes(k)
-      );
-      if(!isUpdateAllowed){
-         throw new Error("update not allowed ");
-      }
-      if(value?.skills.length > 10){
-         throw new Error("update not allowed skills are greater than 10 ")
-      }
-      const user = await User.findByIdAndUpdate(userId,value,{
-         runValidators: true,
-      });
-      res.send("user updated");
-   }catch(err){
-      res.status(401).send("something went wrong "+ err.message);
-   }
-});
-
 connectDb()
    .then(() =>{
       console.log("database connection established..");
