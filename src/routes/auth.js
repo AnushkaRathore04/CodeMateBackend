@@ -11,6 +11,13 @@ authRouter.post("/signup",async(req,res)=>{
       validateSignUpData(req);
       //encrypting the password
       const {firstName, lastName, emailID,password} = req.body;
+
+      // check if user already exists
+      const existingUser = await User.findOne({ emailID });
+      if (existingUser) {
+         throw new Error("User already exists with this email");
+      }
+
       const passwordHash = await bcrypt.hash(password,10);
       //creating a new instance of a user model
       const user = new User({
@@ -19,8 +26,14 @@ authRouter.post("/signup",async(req,res)=>{
          emailID,
          password : passwordHash,
       });
-      await user.save();//this will return a promise
-      res.send("user added successfully");
+      const savedUser = await user.save();//this will return a promise
+
+      const token  = await savedUser.getJWT();//so we have offloaded our jwt logic to our schema method
+      res.cookie("token",token,{
+         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      });
+      
+      res.json({message:"user added successfully!", data: savedUser});
    }catch(err){
       res.status(400).send("Error: " +err.message);
    }
@@ -41,7 +54,7 @@ authRouter.post("/login", async (req,res) => {
 
          //Add the token to cookie and send the response back to the user
          res.cookie("token",token,{expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)});
-         res.send("login successfully");
+         res.send(user);
       }else{
          throw new Error("Invalid credentials");
       }

@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema({
         type:String,
         trim: true,
         lowercase: true,
+        unique:true,
         required: true,
         maxLength: 30,
         validate(value) {
