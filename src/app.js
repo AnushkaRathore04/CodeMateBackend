@@ -6,7 +6,7 @@ const cors = require("cors");
 
 app.use(
    cors({
-      origin: "http://16.170.248.154",
+      origin: ["http://16.170.248.154", "http://localhost:5173"],
       credentials:true,
    })
 );
